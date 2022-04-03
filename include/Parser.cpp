@@ -1,5 +1,4 @@
-//
-// Created by goose on 21.03.2022.
-//
+// Copyright 2022 wm8
+
 
 #include "Parser.h"

@@ -80,7 +80,7 @@ string downloadHttp(Uri& u, int version, int redirect_n) {
     req.keep_alive(true);
     req.set(boost::beast::http::field::connection, "keep-alive");
     http::write(stream, req);
-    stream.expires_after (std::chrono::seconds(10));
+    stream.expires_after(std::chrono::seconds(10));
     beast::flat_buffer buffer;
     http::response<http::dynamic_body> res;
     beast::error_code ec;
@@ -88,7 +88,7 @@ string downloadHttp(Uri& u, int version, int redirect_n) {
     if (res.body().size() > 1000000)
       return "";
     if (ec && ec == http::error::bad_version)
-      return downloadHttp(u, 10,redirect_n);
+      return downloadHttp(u, 10, redirect_n);
     stream.socket().shutdown(tcp::socket::shutdown_both, ec);
     if (ec && ec != beast::errc::not_connected) {
       std::cerr << "80 - " << ec.message() << std::endl;
@@ -122,7 +122,7 @@ string getHTML(string &url)
 {
   Uri u = Uri::Parse(url);
   string html;
-  if(u.protocol == "http")
+  if (u.protocol == "http")
     html = downloadHttp(u, 11);
   else
     html = downloadHttps(u);

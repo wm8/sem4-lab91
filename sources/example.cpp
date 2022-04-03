@@ -21,6 +21,6 @@ auto example() -> void {
     data->urls.pop();
   }
   std::cout << "Images:" << std::endl;
-  for(size_t i=0; i!= data->img_urls.size(); i++)
+  for (size_t i=0; i!= data->img_urls.size(); i++)
     std::cout << data->img_urls[i] << std::endl;
 }
