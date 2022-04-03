@@ -26,22 +26,24 @@ string(APPEND CMAKE_CXX_FLAGS " -pedantic -Werror -Wall -Wextra")
 string(APPEND CMAKE_CXX_FLAGS " -Wno-unused-command-line-argument")
 string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
-# new versions of cmake contain gtest search files
-# commented out to increase the build speed.
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
 hunter_add_package(OpenSSL)
 find_package(OpenSSL REQUIRED)
 hunter_add_package(Beast)
 find_package(Beast CONFIG REQUIRED)
-
+hunter_add_package(Boost COMPONENTS system program_options)
+find_package(Boost CONFIG REQUIRED system program_options)
+hunter_add_package(gumbo)
+find_package(gumbo CONFIG REQUIRED)
 
 add_library(${PROJECT_NAME} STATIC
-  # enum your files and delete this comment
   ${CMAKE_CURRENT_SOURCE_DIR}/sources/example.cpp
-        include/Loader.cpp include/Loader.h include/Data.h include/Uri.h include/sertificates.h)
+        include/Loader.cpp include/Loader.h include/Data.h include/Uri.h include/sertificates.h include/Program.cpp include/Program.h include/Parser.cpp include/Parser.h)
 target_link_libraries(${PROJECT_NAME} OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(${PROJECT_NAME} Beast::Beast)
+target_link_libraries(${PROJECT_NAME} Boost::system Boost::program_options)
+target_link_libraries(${PROJECT_NAME} gumbo::gumbo)
 
 add_executable(demo
   ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
@@ -56,7 +58,6 @@ target_link_libraries(demo ${PROJECT_NAME})
 
 if(BUILD_TESTS)
   add_executable(tests
-    # TODO: enum your files and delete this comment
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/example.cpp
   )
   target_link_libraries(tests ${PROJECT_NAME} GTest::gtest_main)

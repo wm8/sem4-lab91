@@ -1,15 +1,13 @@
-//
-// Created by user on 3/10/22.
-
+// Copyright 2022 wm8
 #ifndef TEMPLATE_URI_H
 #define TEMPLATE_URI_H
 #include <string>
-#include <algorithm>    // find
+#include <algorithm>
 
 struct Uri
 {
  public:
-  std::string query, target, protocol, host, port, _url;
+  std::string query="", target="", protocol="", host="", port="", _url="";
 
   static Uri Parse(std::string const& url)
   {
@@ -25,10 +23,9 @@ struct Uri
 
     // get query start
     iterator_t queryStart = std::find(_uri.begin(), uriEnd, L'?');
-
     // protocol
     iterator_t protocolStart = _uri.begin();
-    iterator_t protocolEnd = std::find(protocolStart, uriEnd, L':');            //"://");
+    iterator_t protocolEnd = std::find(protocolStart, uriEnd, L':');
 
     if (protocolEnd != uriEnd)
     {
@@ -46,11 +43,12 @@ struct Uri
 
     // host
     iterator_t hostStart = protocolEnd;
-    iterator_t pathStart = std::find(hostStart, uriEnd, L'/');  // get pathStart
+    iterator_t pathStart = std::find(hostStart, uriEnd, L'/');
 
     iterator_t hostEnd = std::find(protocolEnd,
-                                   (pathStart != uriEnd) ? pathStart : queryStart,
-                                   L':');  // check for port
+                        (pathStart != uriEnd)
+                             ? pathStart : queryStart,
+                              L':');  // check for port
 
     result.host = std::string(hostStart, hostEnd);
 
@@ -81,5 +79,21 @@ struct Uri
     return result;
 
   }   // Parse
-};  // uri
+  static std::string getFullUrl([[maybe_unused]]std::string url,
+                                std::string target)
+  {
+    Uri u = Uri::Parse(url);
+    if(target[0] == '/') {
+      if(target[1] == '/')
+        return u.protocol + ':' + target;
+      return u.protocol + "://" + u.host + target;
+    }
+    if(target[0] == '#')
+      return u.protocol + "://" + u.host + "/#/" + target.substr(1);
+    if(target[0] != 'h' && target[1] != 't'
+        && target[2] != 't' && target[3] != 'p')
+      return u.protocol + "://" + u.host + '/' + target;
+    return target;
+  }
+};
 #endif  // TEMPLATE_URI_H
