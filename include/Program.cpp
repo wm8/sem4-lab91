@@ -17,9 +17,9 @@ bool Program::ParseArgs(int argc, char **argv)
   desc.add_options()
       ("depth", po::value<int>(), "глубина поиска по странице")
       ("url", po::value<std::string>(), "адрес HTML страницы")
-      ("network_threads", po::value<int>(), 
+      ("network_threads", po::value<int>(),
           "количество потоков для скачивания страниц")
-      ("parser_threads", po::value<int>(), 
+      ("parser_threads", po::value<int>(),
           "количество потоков для обработки страниц")
           ("output", po::value<std::string>(), "путь до выходного файла");
   po::variables_map map;
@@ -58,7 +58,7 @@ Data* Program::Run()
     std::vector<std::thread> workMachines;
     for (int i=0; i != network_threads; i++) {
       workMachines.emplace_back(Program::DownloadFunction, data);
-      std::this_thread::sleep_for (std::chrono::milliseconds(20));
+      std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
     for (int i=0; i != network_threads; i++)
       if (workMachines[i].joinable())
@@ -68,7 +68,7 @@ Data* Program::Run()
         << data->htmls.size() << " htmls\n";
     for (int i=0; i != parser_threads; i++) {
       workMachines.emplace_back(Program::ParseFunction, data);
-      std::this_thread::sleep_for (std::chrono::milliseconds(20));
+      std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
     for (int i=0; i != parser_threads; i++)
       if (workMachines[i].joinable())
@@ -81,7 +81,7 @@ Data* Program::Run()
   return data;
 }
 void Program::DownloadFunction(Data* data) {
-  while(!data->urls.empty() && isRunning)
+  while (!data->urls.empty() && isRunning)
   {
     data->mut.lock();
     string url = data->urls.front();
@@ -91,14 +91,14 @@ void Program::DownloadFunction(Data* data) {
   }
 }
 void Program::ParseFunction(Data* data) {
-  while(!data->htmls.empty() && isRunning)
+  while (!data->htmls.empty() && isRunning)
   {
     data->mut.lock();
     auto html = data->htmls.front();
     data->htmls.pop();
     data->mut.unlock();
     parser::searchForImages(html, data);
-    std::this_thread::sleep_for (std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
 void Program::SaveToFile(Data* data) {
