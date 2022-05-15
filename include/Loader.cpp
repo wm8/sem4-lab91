@@ -1,7 +1,7 @@
 // Copyright 2022 vlados2003
 
 #include "Loader.h"
-
+//Скачиваем htpps
 string downloadHttps(Uri& u, int redirect_n)
 {
   try {
@@ -13,6 +13,8 @@ string downloadHttps(Uri& u, int redirect_n)
     ssl::context ctx{ssl::context::sslv23_client};
     load_root_certificates(ctx);
     tcp::resolver resolver{ioc};
+    //Нужно для https запросов
+    //Говоришь сама не совсем понимаешь как эти хендшейки работают
     ssl::stream<tcp::socket> stream{ioc, ctx};
     if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str())) {
       /*boost::system::error_code ec{static_cast<int>(::ERR_get_error()),
@@ -23,26 +25,33 @@ string downloadHttps(Uri& u, int redirect_n)
     auto const results = resolver.resolve(host, port);
     boost::asio::connect(stream.next_layer(), results.begin(), results.end());
     stream.handshake(ssl::stream_base::client);
+    //Ставим get тип запроса
     http::request<http::string_body> req{http::verb::get, target, version};
+    //Указываем url
     req.set(http::field::host, host);
+    //Указываем юзер агент
     req.set(http::field::user_agent,
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
             " (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36");
-    //stream.lowest_layer().set_option(boost::asio::detail::socket_option::
-    // integer<SOL_SOCKET, SO_RCVTIMEO>{ 200000 });
+    //Производим запрос
     http::write(stream, req);
     boost::beast::flat_buffer buffer;
     http::response<http::dynamic_body> res;
+    //Читаем данные
     http::read(stream, buffer, res);
+    //Если скачанные данные большие слишком мы их игнорим
     if (res.body().size() > 1000000)
       return "";
     beast::error_code ec;
+    //Закрываем соединение
     stream.shutdown(ec);
     if (ec && (ec != beast::errc::not_connected
                && ec != ssl::error::stream_truncated)) {
       std::cerr << u._url << " " << ec.message() << std::endl;
     }
+    //Обрабатываем некоторые типы серверных ответов
     switch (res.base().result_int()) {
+        //Ошибки переадресации
       case 301:
       case 302:
       {
@@ -55,9 +64,11 @@ string downloadHttps(Uri& u, int redirect_n)
         }
       }
         break;
+        //Если все хорошо, то просто возращаем страницу
       case 200:
       case 400:
         return boost::beast::buffers_to_string(res.body().data());
+        //Если неизвестная ошибка - пишем ее код в терминал
       default:
         std::cout << u._url << " - HTTP status " << res.result_int() << "\n";
         break;
@@ -65,6 +76,8 @@ string downloadHttps(Uri& u, int redirect_n)
   } catch (...) {}
   return "";
 }
+//Метод скачки http (БЕЗ S)
+//Похож на https
 string downloadHttp(Uri& u, int version, int redirect_n) {
   try {
     net::io_context ioc;
@@ -117,14 +130,18 @@ string downloadHttp(Uri& u, int version, int redirect_n) {
   } catch (...) {}
   return "";
 }
-
+//Метод скачки html страницы (общий)
 string getHTML(string &url)
 {
+  //Парсим ссылку
   Uri u = Uri::Parse(url);
   string html;
+  //Если произведен http запрос
   if (u.protocol == "http")
+    //Качаем http
     html = downloadHttp(u, 11);
   else
+    //Иначе https
     html = downloadHttps(u);
   return html;
 }

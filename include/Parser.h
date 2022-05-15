@@ -6,6 +6,9 @@
 #include <gumbo.h>
 namespace parser
 {
+//Метод поиска изображений
+//Говоришь что честно не совсем понимаешь как это все раюотает, в документации
+//нашла этот кусок кода, и исправила то что будет закоменчено
   void searchForImages(HTML& html, Data* data) {
     try {
       GumboOutput* output = gumbo_parse(html.data.c_str());
@@ -18,16 +21,21 @@ namespace parser
         qn.pop();
         if (GUMBO_NODE_ELEMENT == node->type) {
           GumboAttribute* attr = nullptr;
+          //Если таг html элемента href - то это ссылка
           if (node->v.element.tag == GUMBO_TAG_A &&
               (attr = gumbo_get_attribute(&node->v.element.attributes, "href"))) {
             std::string s = Uri::getFullUrl(html.url, attr->value);
+            //Мутексом блок
             data->mut.lock();
+            //Ищем, не скачивали ли мы уже эту страницу
             if (data->used.find(s) == data->used.end()) {
+              //Если нет, в массив ссылок добавляем
               data->urls.push(s);
               data->used.insert(s);
-              //data->dbgu.emplace_back(DebugData(data->current_depth, s));
             }
+            //Мутекс отключаем
             data->mut.unlock();
+            //Иначе если таг html элемента src - то это картинка, все то же самое что и выше
           } else if (node->v.element.tag == GUMBO_TAG_IMG &&
                      (attr = gumbo_get_attribute(&node->v.element.attributes,
                                                  "src"))) {
