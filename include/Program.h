@@ -1,4 +1,4 @@
-// Copyright 2022 wm8
+// Copyright 2022 vlados2003
 #ifndef TEMPLATE_PROGRAM_H
 #define TEMPLATE_PROGRAM_H
 #include <string>

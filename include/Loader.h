@@ -1,6 +1,4 @@
-//
-// Created by goose on 21.03.2022.
-//
+// Copyright 2022 vlados2003
 
 #ifndef TEMPLATE_LOADER_H
 #define TEMPLATE_LOADER_H

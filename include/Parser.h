@@ -1,4 +1,4 @@
-// Copyright 2022 wm8
+// Copyright 2022 vlados2003
 #ifndef TEMPLATE_PARSER_H
 #define TEMPLATE_PARSER_H
 #include "Data.h"
